@@ -82,7 +82,59 @@ pub fn std_mapdrop(
     Ok(None)
 }
 
+pub fn std_filter(
+    vm: &mut VM,
+    idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() != 3 {
+        return Err(format!("expected 2 arguments, got {}", args.len()));
+    }
+
+    let module = match args[0].clone() {
+        VMValue::String(module) => module,
+        _ => return Err(format!("expected string, got {}", args[0].name())),
+    };
+
+    let function = match args[1].clone() {
+        VMValue::String(function) => function,
+        _ => return Err(format!("expected string, got {}", args[1].name())),
+    };
+
+    let values = match &args[2] {
+        VMValue::Array(values) => values,
+        _ => return Err(format!("expected array, got {}", args[2].name())),
+    };
+
+    let mut new_array = Vec::new();
+
+    for value in values {
+        let mut idts = idts.clone();
+        idts.push(Some("value".to_string()));
+
+        let result = vm.call(module.clone(), function.clone(), idts, vec![value.clone()]);
+
+        match result {
+            Ok(Some(result)) => {
+                let boolean = match result {
+                    VMValue::Bool(boolean) => boolean,
+                    _ => return Err(format!("expected boolean, got {}", result.name())),
+                };
+
+                if boolean {
+                    new_array.push(value.clone());
+                }
+            }
+            Ok(None) => return Err(format!("expected return value, got None")),
+            Err(err) => return Err(err),
+        }
+    }
+
+    Ok(Some(VMValue::Array(new_array)))
+}
+
 pub fn register(vm: &mut VM) {
     vm.register("std".to_string(), "map".to_string(), std_map);
     vm.register("std".to_string(), "mapdrop".to_string(), std_mapdrop);
+    vm.register("std".to_string(), "filter".to_string(), std_filter);
 }

@@ -65,7 +65,29 @@ pub fn string_join(
     Ok(Some(VMValue::String(string)))
 }
 
+pub fn string_notempty(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() != 1 {
+        return Err(format!("expected 1 argument, got {}", args.len()));
+    }
+
+    let string = match &args[0] {
+        VMValue::String(string) => string,
+        _ => return Err(format!("expected string, got {}", args[0].name())),
+    };
+
+    Ok(Some(VMValue::Bool(!string.is_empty())))
+}
+
 pub fn register(vm: &mut VM) {
     vm.register("string".to_string(), "split".to_string(), string_split);
     vm.register("string".to_string(), "join".to_string(), string_join);
+    vm.register(
+        "string".to_string(),
+        "notempty".to_string(),
+        string_notempty,
+    );
 }
