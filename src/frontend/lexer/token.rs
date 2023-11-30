@@ -12,6 +12,8 @@ pub enum TokenType {
     // Keywords
     Goto, // goto
     If,   // if
+    Call, // call
+    Ret,  // ret
 
     // Single-character tokens
     Colon,   // :

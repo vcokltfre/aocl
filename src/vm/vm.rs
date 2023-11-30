@@ -15,6 +15,7 @@ pub struct VM {
     pub gotos: HashMap<String, usize>,
     pub variables: HashMap<String, VMValue>,
     pub index: usize,
+    pub call_stack: Vec<usize>,
 }
 
 impl VM {
@@ -25,6 +26,7 @@ impl VM {
             gotos: HashMap::new(),
             variables: HashMap::new(),
             index: 0,
+            call_stack: Vec::new(),
         }
     }
 
@@ -99,6 +101,8 @@ impl VM {
             }
             StatementContext::GotoIf(identifier, compare) => self.op_goto_if(identifier, compare),
             StatementContext::Call(call_target, args) => self.op_call(call_target, args),
+            StatementContext::CallLabel(label) => self.op_call_label(label),
+            StatementContext::Ret => self.op_ret(),
         };
 
         if let Err(e) = res {
@@ -279,6 +283,23 @@ impl VM {
         }
 
         self.call(target.module, target.function, idts, args)?;
+
+        Ok(())
+    }
+
+    fn op_call_label(&mut self, label: String) -> Result<(), String> {
+        self.call_stack.push(self.index);
+        self.index = *self.gotos.get(&label).unwrap();
+
+        Ok(())
+    }
+
+    fn op_ret(&mut self) -> Result<(), String> {
+        if let Some(index) = self.call_stack.pop() {
+            self.index = index;
+        } else {
+            return Err("call stack is empty".to_string());
+        }
 
         Ok(())
     }

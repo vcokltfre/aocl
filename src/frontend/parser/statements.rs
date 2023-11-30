@@ -105,6 +105,8 @@ pub enum StatementContext {
     Goto(String),
     GotoIf(String, Compare),
     Call(CallTarget, Vec<Value>),
+    CallLabel(String),
+    Ret,
 }
 
 impl StatementContext {
@@ -142,6 +144,8 @@ impl StatementContext {
                         .join(" ")
                 )
             }
+            StatementContext::CallLabel(identifier) => format!("call {}", identifier),
+            StatementContext::Ret => "ret".to_string(),
         }
     }
 }

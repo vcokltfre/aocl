@@ -434,6 +434,42 @@ impl Parser {
         });
     }
 
+    fn parse_call_label(&mut self) -> ParseResult {
+        let tokens = self.require(3)?;
+
+        if !tokens[1].is_identifier() {
+            return Err(tokens[1].error(format!(
+                "Expected identifier, found {:?}",
+                tokens[1].token_type
+            )));
+        }
+
+        self.current += 3;
+
+        let name = match tokens[1].token_type.clone() {
+            TokenType::Identifier(name) => name,
+            _ => unreachable!(),
+        };
+
+        Ok(Statement {
+            context: StatementContext::CallLabel(name),
+            file: tokens[0].file.clone(),
+            line: tokens[0].line,
+        })
+    }
+
+    fn parse_ret(&mut self) -> ParseResult {
+        let tokens = self.require(2)?;
+
+        self.current += 2;
+
+        Ok(Statement {
+            context: StatementContext::Ret,
+            file: tokens[0].file.clone(),
+            line: tokens[0].line,
+        })
+    }
+
     fn parse_statement(&mut self) -> ParseResult {
         let token = self.tokens[self.current].clone();
 
@@ -442,6 +478,8 @@ impl Parser {
             TokenType::At => self.parse_call(),
             TokenType::Goto => self.parse_goto(),
             TokenType::Identifier(_) => self.parse_assign(),
+            TokenType::Call => self.parse_call_label(),
+            TokenType::Ret => self.parse_ret(),
 
             _ => Err(token.error(format!("Unexpected token"))),
         }

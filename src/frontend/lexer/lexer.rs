@@ -268,6 +268,8 @@ impl Lexer {
         match ident.as_str() {
             "if" => return Ok(self.make_token(TokenType::If, 2)),
             "goto" => return Ok(self.make_token(TokenType::Goto, 4)),
+            "call" => return Ok(self.make_token(TokenType::Call, 4)),
+            "ret" => return Ok(self.make_token(TokenType::Ret, 3)),
             "true" => return Ok(self.make_token(TokenType::Bool(true), 4)),
             "false" => return Ok(self.make_token(TokenType::Bool(false), 5)),
             _ => Ok(self.make_token(TokenType::Identifier(ident), ident_size.try_into().unwrap())),
