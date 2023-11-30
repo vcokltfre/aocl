@@ -28,6 +28,18 @@ pub fn io_println(
     Ok(None)
 }
 
+pub fn io_sprint(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() != 1 {
+        return Err(format!("expected 1 argument, got {}", args.len()));
+    }
+
+    Ok(Some(VMValue::String(args[0].to_string())))
+}
+
 pub fn io_read(
     _vm: &mut VM,
     _idts: Vec<Option<String>>,
@@ -59,6 +71,7 @@ pub fn io_readln(
 pub fn register(vm: &mut VM) {
     vm.register("io".to_string(), "print".to_string(), io_print);
     vm.register("io".to_string(), "println".to_string(), io_println);
+    vm.register("io".to_string(), "sprint".to_string(), io_sprint);
     vm.register("io".to_string(), "read".to_string(), io_read);
     vm.register("io".to_string(), "readln".to_string(), io_readln);
 }
