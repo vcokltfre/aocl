@@ -504,6 +504,30 @@
       ],
     };
 
+    const moduleStack = {
+      name: "stack",
+      description: "Provides functions for working with the stack.",
+      members: [
+        makeFunction(
+          "push",
+          "Pushes a value to the stack.",
+          [makeParam("value", "any", "The value to push to the stack.")],
+          {
+            type: "void",
+            description: "Nothing.",
+          }
+        ),
+        makeFunction("pop", "Pops a value from the stack.", [], {
+          type: "any",
+          description: "The popped value.",
+        }),
+        makeFunction("len", "Gets the length of the stack.", [], {
+          type: "int",
+          description: "The length of the stack.",
+        }),
+      ],
+    };
+
     const moduleStd = {
       name: "std",
       description: "Provides various standard library functions.",

@@ -16,6 +16,7 @@ pub struct VM {
     pub variables: HashMap<String, VMValue>,
     pub index: usize,
     pub call_stack: Vec<usize>,
+    pub stack: Vec<VMValue>,
 }
 
 impl VM {
@@ -27,6 +28,7 @@ impl VM {
             variables: HashMap::new(),
             index: 0,
             call_stack: Vec::new(),
+            stack: Vec::new(),
         }
     }
 
