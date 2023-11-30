@@ -367,6 +367,18 @@ impl Lexer {
             }
             '0'..='9' => self.get_number(),
             'a'..='z' | 'A'..='Z' => self.get_ident(),
+            '#' => {
+                loop {
+                    let c = self.advance();
+                    if c.is_none() {
+                        break;
+                    }
+                    if c.unwrap() == '\n' {
+                        break;
+                    }
+                }
+                self.get_token()
+            }
             '"' => self.get_string(),
             _ => Err(self.error("Unexpected character: ".to_string() + &c.to_string())),
         }
