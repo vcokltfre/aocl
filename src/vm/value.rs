@@ -1,3 +1,5 @@
+use core::fmt;
+
 use crate::frontend::parser::Value;
 
 #[derive(Debug, PartialEq, Clone, PartialOrd)]
@@ -8,6 +10,31 @@ pub enum VMValue {
     String(String),
     Identifier(String),
     Array(Vec<VMValue>),
+}
+
+impl fmt::Display for VMValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Bool(bool) => write!(f, "{}", bool),
+            Self::Int(int) => write!(f, "{}", int),
+            Self::Float(float) => write!(f, "{}", float),
+            Self::String(string) => write!(f, "{}", string),
+            Self::Identifier(identifier) => write!(f, "{}", identifier),
+            Self::Array(array) => {
+                write!(f, "[")?;
+
+                for (i, value) in array.iter().enumerate() {
+                    if i != 0 {
+                        write!(f, ", ")?;
+                    }
+
+                    write!(f, "{}", value)?;
+                }
+
+                write!(f, "]")
+            }
+        }
+    }
 }
 
 impl Eq for VMValue {}
