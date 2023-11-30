@@ -1,0 +1,420 @@
+file = "example/aoc2022-01.aocl"
+
+data = @file:read file
+data_chars = @string:split data ""
+@array:pop data_chars
+data_len = @array:len data_chars
+
+data_lines = @string:split data "\n"
+
+tokens = @array:new
+
+ptr = 1
+line = 1
+col = 1
+
+~read_token
+
+current = @array:get data_chars ptr
+
+valid_ident = @string:contains "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_" current
+valid_number = @string:contains "0123456789" current
+whitespace = @string:contains " \t" current
+
+goto read_colon if current == ":"
+goto read_at if current == "@"
+goto read_tilde if current == "~"
+goto read_plus if current == "+"
+goto read_minus if current == "-"
+goto read_star if current == "*"
+goto read_slash if current == "/"
+goto read_percent if current == "%"
+goto read_identifier if valid_ident == true
+goto read_numeric if valid_number == true
+goto read_newline if current == "\n"
+goto read_whitespace if whitespace == true
+goto read_equals if current == "="
+goto read_less if current == "<"
+goto read_greater if current == ">"
+goto read_notequals if current == "!"
+goto read_str if current == "\""
+
+goto error
+
+# Match ':'
+~read_colon
+@array:push tokens "colon:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match ':' done
+
+# Match '@'
+~read_at
+@array:push tokens "at:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match '@' done
+
+# Match '~'
+~read_tilde
+@array:push tokens "tilde:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match '~' done
+
+# Match '+'
+~read_plus
+@array:push tokens "plus:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match '+' done
+
+# Match '-'
+~read_minus
+@array:push tokens "minus:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match '-' done
+
+# Match '*'
+~read_star
+@array:push tokens "star:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match '*' done
+
+# Match '/'
+~read_slash
+@array:push tokens "slash:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match '/' done
+
+# Match '%'
+~read_percent
+@array:push tokens "percent:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match '%' done
+
+# Match identifier
+~read_identifier
+
+builder = @array:new current
+
+~read_identifier_loop
+ptr = ptr + 1
+col = col + 1
+
+goto read_identifier_done if ptr >= data_len
+
+current = @array:get data_chars ptr
+valid_ident = @string:contains "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_" current
+
+goto read_identifier_done if valid_ident == false
+
+@array:push builder current
+goto read_identifier_loop
+
+~read_identifier_done
+built = @string:join builder ""
+
+goto read_identifier_kw_goto if built == "goto"
+goto read_identifier_kw_if if built == "if"
+
+token = @array:new "identifier:" built
+token_joined = @string:join token ""
+@array:push tokens token_joined
+goto read_token_done
+
+~read_identifier_kw_goto
+@array:push tokens "goto:"
+goto read_token_done
+
+~read_identifier_kw_if
+@array:push tokens "if:"
+goto read_token_done
+# Match identifier done
+
+# Match numeric
+~read_numeric
+builder = @array:new current
+is_float = false
+
+goto read_numeric_loop
+
+~read_numeric_set_float
+goto error if is_float == true
+is_float = true
+@array:push builder current
+
+~read_numeric_loop
+ptr = ptr + 1
+col = col + 1
+
+goto read_numeric_done if ptr >= data_len
+current = @array:get data_chars ptr
+
+valid_number = @string:contains "0123456789" current
+valid_float = @string:contains "." current
+
+goto read_numeric_set_float if valid_float == true
+goto read_numeric_done if valid_number == false
+
+@array:push builder current
+
+goto read_numeric_loop
+
+~read_numeric_done
+built = @string:join builder ""
+
+goto push_float if is_float == true
+goto push_int
+
+~push_float
+token = @array:new "float:" built
+token_joined = @string:join token ""
+@array:push tokens token_joined
+goto read_token_done
+
+~push_int
+token = @array:new "int:" built
+token_joined = @string:join token ""
+@array:push tokens token_joined
+goto read_token_done
+# Match numeric done
+
+# Match newline
+~read_newline
+ptr = ptr + 1
+line = line + 1
+col = 1
+
+@array:push tokens "eos:"
+
+goto read_token_done
+# Match newline done
+
+# Match whitespace
+~read_whitespace
+ptr = ptr + 1
+col = col + 1
+
+goto read_token_done if ptr >= data_len
+
+current = @array:get data_chars ptr
+whitespace = @string:contains " \t" current
+
+goto read_token_done if whitespace == false
+
+goto read_whitespace
+# Match whitespace done
+
+# Match =/==
+~read_equals
+ptr = ptr + 1
+col = col + 1
+
+goto read_equals_single if ptr >= data_len
+
+current = @array:get data_chars ptr
+goto read_equals_double if current == "="
+goto read_equals_single
+
+~read_equals_single
+@array:push tokens "equals:"
+goto read_token_done
+
+~read_equals_double
+@array:push tokens "equalsequals:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match =/== done
+
+# Match </<=
+~read_less
+ptr = ptr + 1
+col = col + 1
+
+goto read_le_single if ptr >= data_len
+
+current = @array:get data_chars ptr
+goto read_le_double if current == "="
+goto read_le_single
+
+~read_le_single
+@array:push tokens "less:"
+goto read_token_done
+
+~read_le_double
+@array:push tokens "lessequals:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match </<= done
+
+# Match >/>=
+~read_greater
+ptr = ptr + 1
+col = col + 1
+
+goto read_ge_single if ptr >= data_len
+
+current = @array:get data_chars ptr
+goto read_ge_double if current == "="
+goto read_ge_single
+
+~read_ge_single
+@array:push tokens "greater:"
+goto read_token_done
+
+~read_ge_double
+@array:push tokens "greaterequals:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match >/>= done
+
+# Match !=
+~read_notequals
+ptr = ptr + 1
+col = col + 1
+
+goto error if ptr >= data_len
+current = @array:get data_chars ptr
+goto error if current != "="
+
+@array:push tokens "notequals:"
+ptr = ptr + 1
+col = col + 1
+goto read_token_done
+# Match != done
+
+# Match string
+~read_str
+ptr = ptr + 1
+col = col + 1
+
+goto error if ptr >= data_len
+
+value = @array:new
+escape = false
+
+goto read_str_loop
+
+~set_read_str_escape
+escape = true
+ptr = ptr + 1
+col = col + 1
+
+goto error if ptr >= data_len
+
+~read_str_loop
+current = @array:get data_chars ptr
+goto error if current == "\n"
+
+goto set_read_str_escape if current == "\\"
+
+goto read_str_escape if escape == true
+goto read_str_done if current == "\""
+goto normal
+
+~read_str_escape
+escape = false
+
+valid_escape = @string:contains "nrt0\"\\" current
+goto error if valid_escape == false
+
+@array:push value "\\"
+@array:push value current
+
+ptr = ptr + 1
+col = col + 1
+
+goto error if ptr >= data_len
+
+goto read_str_loop
+
+~normal
+
+@array:push value current
+ptr = ptr + 1
+col = col + 1
+goto read_str_loop
+
+~read_str_done
+ptr = ptr + 1
+col = col + 1
+
+built = @string:join value ""
+token = @array:new "string:" built
+token_joined = @string:join token ""
+
+@array:push tokens token_joined
+goto read_token_done
+# Match string done
+
+~read_token_done
+
+token = @array:new
+
+goto read_token if ptr < data_len
+goto done
+
+~error
+
+message = @array:new "Error: unexpected character '"
+
+@io:print "Error: unexpected character '"
+@array:push message current
+@array:push message "' at line "
+line_str = @convert:itoa line
+@array:push message line_str
+@array:push message ", column "
+col_str = @convert:itoa col
+@array:push message col_str
+
+message = @string:join message ""
+
+@io:println "Error occurred during lexical analysis:"
+
+line = line - 1
+line_data = @array:get data_lines line
+@io:print "> "
+@io:println line_data
+@io:print "  "
+
+padding = @array:new
+
+col = col - 1
+
+~error_pad_loop
+
+@array:push padding " "
+col = col - 1
+
+goto error_pad_loop if col > 0
+
+~error_padding_done
+
+padding_joined = @string:join padding ""
+@io:print padding_joined
+@io:print "^ "
+@io:println message
+
+goto end
+
+~done
+
+@std:mapdrop "io" "println" tokens
+
+~end
