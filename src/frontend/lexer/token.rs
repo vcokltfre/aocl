@@ -15,10 +15,6 @@ pub enum TokenType {
     If,     // if
 
     // Single-character tokens
-    LParen,   // (
-    RParen,   // )
-    LBrace,   // {
-    RBrace,   // }
     LBracket, // [
     RBracket, // ]
     Colon,    // :
@@ -38,6 +34,10 @@ pub enum TokenType {
     BangEquals,    // !=
     LessEquals,    // <=
     GreaterEquals, // >=
+
+    // Meta
+    EOS,
+    EOF,
 }
 
 #[derive(Debug, PartialEq, Clone)]
