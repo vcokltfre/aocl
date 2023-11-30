@@ -55,10 +55,15 @@ impl fmt::Display for Error {
             ErrorLocation::Interpreter => "Runtime",
         };
 
+        let mut col = self.column;
+        if col == 0 {
+            col = 1;
+        }
+
         let sidebar_padding = " ".repeat(self.line.to_string().len());
         let arrow = "-->".blue().bold();
         let sidebar = "|".blue().bold();
-        let padding = " ".repeat(self.column - 1);
+        let padding = " ".repeat(col - 1);
         let bar = "^".repeat(self.width).blue().bold();
 
         write!(
