@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AOCL Docs</title>
+  </head>
+
+  <style>
+    :root,
+    body {
+      background-color: #1e1e1e;
+      color: #fff;
+      padding: 0;
+      margin: 0;
+      font-family: sans-serif;
+    }
+
+    nav {
+      background-color: #2e2e2e;
+      height: 2.5rem;
+      padding: 0 20%;
+      display: flex;
+      align-items: center;
+    }
+
+    nav span {
+      font-size: 1rem;
+      color: #aaa;
+    }
+
+    nav input {
+      background-color: #282828;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 1rem;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      width: 20rem;
+      margin-left: 1rem;
+      height: 2rem;
+    }
+
+    main {
+      padding: 0 20%;
+      margin-top: 1rem;
+    }
+
+    .module {
+      margin-bottom: 1rem;
+      background-color: #282828;
+      padding: 1rem;
+    }
+
+    .module h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .module h2 code {
+      font-size: 1.5rem;
+      color: #fff;
+    }
+
+    .module .members {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .module .members .func {
+      background-color: #2e2e2e;
+      padding: 1rem;
+      border-radius: 0.25rem;
+      margin-top: 1rem;
+      width: 100%;
+    }
+
+    .module .members .func h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .module .members .func h3 code {
+      font-size: 1.25rem;
+      color: #fff;
+    }
+
+    .module .members .func p {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .module .members .func h4 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .module .members .func h4 code {
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .module .members .func ul {
+      margin-bottom: 0.5rem;
+    }
+
+    .module .members .func ul li {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .module .members .func ul li code {
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .module .members .func ul li span {
+      font-size: 1rem;
+      color: #aaa;
+    }
+
+    .module .members .func p {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .module .members .func p code {
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    .fg {
+      flex-grow: 1;
+    }
+
+    .sticky {
+      position: sticky;
+      top: 0;
+    }
+  </style>
+
+  <body>
+    <nav class="sticky">
+      <h1>AOCL <span>v1.0.0</span></h1>
+      <div class="fg"></div>
+      <input type="text" placeholder="Search..." oninput="render(this.value)" />
+    </nav>
+    <main></main>
+  </body>
+
+  <script>
+    function makeParam(name, type, description) {
+      return {
+        name,
+        type,
+        description,
+      };
+    }
+
+    function makeFunction(name, description, params, returns) {
+      return {
+        name,
+        description,
+        params,
+        returns,
+      };
+    }
+
+    const moduleArray = {
+      name: "array",
+      description: "Provides functions for working with arrays.",
+      members: [
+        makeFunction(
+          "new",
+          "Creates a new array.",
+          [makeParam("*items", "any", "The items to add to the array.")],
+          {
+            type: "array",
+            description: "The new array.",
+          }
+        ),
+        makeFunction(
+          "get",
+          "Gets an item from an array.",
+          [
+            makeParam("arr", "array", "The array to get the item from."),
+            makeParam("index", "number", "The index of the item to get."),
+          ],
+          {
+            type: "any",
+            description: "The item at the specified index.",
+          }
+        ),
+        makeFunction(
+          "pop",
+          "Removes the last item from an array.",
+          [makeParam("arr", "array", "The array to remove the item from.")],
+          {
+            type: "any",
+            description: "The removed item.",
+          }
+        ),
+        makeFunction(
+          "popat",
+          "Removes an item from an array at a specified index.",
+          [
+            makeParam("arr", "array", "The array to remove the item from."),
+            makeParam("index", "number", "The index of the item to remove."),
+          ],
+          {
+            type: "any",
+            description: "The removed item.",
+          }
+        ),
+        makeFunction(
+          "push",
+          "Adds an item to the end of an array.",
+          [
+            makeParam("arr", "array", "The array to add the item to."),
+            makeParam("item", "any", "The item to add to the array."),
+          ],
+          {
+            type: "void",
+            description: "Nothing.",
+          }
+        ),
+        makeFunction(
+          "index",
+          "Gets the index of an item in an array.",
+          [
+            makeParam("arr", "array", "The array to get the index from."),
+            makeParam("item", "any", "The item to get the index of."),
+          ],
+          {
+            type: "number",
+            description: "The index of the item.",
+          }
+        ),
+        makeFunction(
+          "reverse",
+          "Reverses the order of an array.",
+          [makeParam("arr", "array", "The array to reverse.")],
+          {
+            type: "void",
+            description: "Nothing.",
+          }
+        ),
+        makeFunction(
+          "sort",
+          "Sorts an array.",
+          [
+            makeParam("arr", "array", "The array to sort."),
+            makeParam(
+              "compare",
+              "function",
+              "The function to use to compare items."
+            ),
+          ],
+          {
+            type: "void",
+            description: "Nothing.",
+          }
+        ),
+        makeFunction(
+          "len",
+          "Gets the length of an array.",
+          [makeParam("arr", "array", "The array to get the length of.")],
+          {
+            type: "int",
+            description: "The length of the array.",
+          }
+        ),
+        makeFunction(
+          "clone",
+          "Clones an array.",
+          [makeParam("arr", "array", "The array to clone.")],
+          {
+            type: "array",
+            description: "The cloned array.",
+          }
+        ),
+        makeFunction(
+          "is",
+          "Checks if two arrays are equal.",
+          [
+            makeParam("arr1", "array", "The first array to check."),
+            makeParam("arr2", "array", "The second array to check."),
+          ],
+          {
+            type: "bool",
+            description: "True if the arrays are equal.",
+          }
+        ),
+      ],
+    };
+
+    const moduleConvert = {
+      name: "convert",
+      description: "Provides functions for converting between types.",
+      members: [
+        makeFunction(
+          "atoi",
+          "Converts a string to an integer.",
+          [makeParam("str", "string", "The string to convert.")],
+          {
+            type: "int",
+            description: "The converted integer.",
+          }
+        ),
+        makeFunction(
+          "itoa",
+          "Converts an integer to a string.",
+          [makeParam("int", "int", "The integer to convert.")],
+          {
+            type: "string",
+            description: "The converted string.",
+          }
+        ),
+        makeFunction(
+          "atof",
+          "Converts a string to a float.",
+          [makeParam("str", "string", "The string to convert.")],
+          {
+            type: "float",
+            description: "The converted float.",
+          }
+        ),
+        makeFunction(
+          "ftoa",
+          "Converts a float to a string.",
+          [makeParam("float", "float", "The float to convert.")],
+          {
+            type: "string",
+            description: "The converted string.",
+          }
+        ),
+      ],
+    };
+
+    const moduleFile = {
+      name: "file",
+      description: "Provides functions for working with files.",
+      members: [
+        makeFunction(
+          "read",
+          "Reads a file.",
+          [makeParam("path", "string", "The path to the file.")],
+          {
+            type: "string",
+            description: "The contents of the file.",
+          }
+        ),
+        makeFunction(
+          "write",
+          "Writes to a file.",
+          [
+            makeParam("path", "string", "The path to the file."),
+            makeParam(
+              "contents",
+              "string",
+              "The contents to write to the file."
+            ),
+          ],
+          {
+            type: "void",
+            description: "Nothing.",
+          }
+        ),
+        makeFunction(
+          "exists",
+          "Checks if a file exists.",
+          [makeParam("path", "string", "The path to the file.")],
+          {
+            type: "bool",
+            description: "True if the file exists.",
+          }
+        ),
+      ],
+    };
+
+    const moduleIO = {
+      name: "io",
+      description: "Provides functions for input and output.",
+      members: [
+        makeFunction(
+          "print",
+          "Prints a string to the console.",
+          [makeParam("str", "string", "The string to print.")],
+          {
+            type: "void",
+            description: "Nothing.",
+          }
+        ),
+        makeFunction(
+          "printf",
+          "Prints a formatted string to the console.",
+          [
+            makeParam(
+              "str",
+              "string",
+              "The string to print with '{}' as placeholders."
+            ),
+            makeParam(
+              "args",
+              "array",
+              "The arguments to format the string with."
+            ),
+          ],
+          {
+            type: "void",
+            description: "Nothing.",
+          }
+        ),
+        makeFunction(
+          "println",
+          "Prints a string to the console followed by a newline.",
+          [makeParam("str", "string", "The string to print.")],
+          {
+            type: "void",
+            description: "Nothing.",
+          }
+        ),
+        makeFunction(
+          "sprint",
+          "Prints a string to a string.",
+          [makeParam("str", "string", "The string to print.")],
+          {
+            type: "string",
+            description: "The printed string.",
+          }
+        ),
+        makeFunction(
+          "sprintf",
+          "Prints a formatted string to a string.",
+          [
+            makeParam(
+              "str",
+              "string",
+              "The string to print with '{}' as placeholders."
+            ),
+            makeParam(
+              "args",
+              "array",
+              "The arguments to format the string with."
+            ),
+          ],
+          {
+            type: "string",
+            description: "The printed string.",
+          }
+        ),
+        makeFunction("read", "Reads a string from the console.", [], {
+          type: "string",
+          description: "The read string.",
+        }),
+        makeFunction(
+          "readln",
+          "Reads a string from the console followed by a newline.",
+          [],
+          {
+            type: "string",
+            description: "The read string.",
+          }
+        ),
+      ],
+    };
+
+    const moduleMath = {
+      name: "math",
+      description: "Provides functions for working with numbers.",
+      members: [
+        makeFunction(
+          "sum",
+          "Sums a list of numbers.",
+          [makeParam("nums", "array", "The numbers to sum.")],
+          {
+            type: "number",
+            description: "The sum of the numbers.",
+          }
+        ),
+        makeFunction(
+          "max",
+          "Gets the maximum number from a list of numbers.",
+          [makeParam("nums", "array", "The numbers to get the maximum from.")],
+          {
+            type: "number",
+            description: "The maximum number.",
+          }
+        ),
+      ],
+    };
+
+    const moduleStd = {
+      name: "std",
+      description: "Provides various standard library functions.",
+      members: [
+        makeFunction(
+          "map",
+          "Maps a function to an array.",
+          [
+            makeParam("arr", "array", "The array to map the function to."),
+            makeParam("mod", "module", "The module to get the function from."),
+            makeParam("func", "string", "The name of the function to map."),
+          ],
+          {
+            type: "array",
+            description: "The mapped array.",
+          }
+        ),
+        makeFunction(
+          "mapdrop",
+          "Maps a function to an array and drops the result.",
+          [
+            makeParam("arr", "array", "The array to map the function to."),
+            makeParam("mod", "module", "The module to get the function from."),
+            makeParam("func", "string", "The name of the function to map."),
+          ],
+          {
+            type: "void",
+            description: "Nothing.",
+          }
+        ),
+        makeFunction(
+          "filter",
+          "Filters an array.",
+          [
+            makeParam("arr", "array", "The array to filter."),
+            makeParam("mod", "module", "The module to get the function from."),
+            makeParam("func", "string", "The name of the function to filter."),
+          ],
+          {
+            type: "array",
+            description: "The filtered array.",
+          }
+        ),
+      ],
+    };
+
+    const moduleString = {
+      name: "string",
+      description: "Provides functions for working with strings.",
+      members: [
+        makeFunction(
+          "split",
+          "Splits a string into an array of substrings.",
+          [
+            makeParam("str", "string", "The string to split."),
+            makeParam("sep", "string", "The separator to split the string by."),
+          ],
+          {
+            type: "array",
+            description: "An array of substrings.",
+          }
+        ),
+        makeFunction(
+          "join",
+          "Joins an array of strings into a single string.",
+          [
+            makeParam("arr", "array", "The array of strings to join."),
+            makeParam(
+              "sep",
+              "string",
+              "The separator to join the strings with."
+            ),
+          ],
+          {
+            type: "string",
+            description: "The joined string.",
+          }
+        ),
+        makeFunction(
+          "notempty",
+          "Returns true if the string is not empty.",
+          [makeParam("str", "string", "The string to check.")],
+          {
+            type: "bool",
+            description: "True if the string is not empty.",
+          }
+        ),
+      ],
+    };
+
+    const modules = [
+      moduleArray,
+      moduleConvert,
+      moduleFile,
+      moduleIO,
+      moduleMath,
+      moduleStd,
+      moduleString,
+    ];
+
+    function setFrag(mod, name) {
+      window.location.hash = `#${mod}-${name}`;
+    }
+
+    function renderFunction(func) {
+      return `
+                <div class="func" id="${func.module.name}-${
+        func.name
+      }" onclick="setFrag('${func.module.name}', '${func.name}')">
+                  <h3><code>${func.name}</code></h3>
+                  <p>${func.description}</p>
+                  <h4>Parameters</h4>
+                  <ul>
+                    ${func.params
+                      .map(
+                        (param) =>
+                          `<li><code>${param.name}</code> <span>${param.type}</span> ${param.description}</li>`
+                      )
+                      .join("")}
+                  </ul>
+                  <h4>Returns</h4>
+                  <p><code>${func.returns.type}</code> ${
+        func.returns.description
+      }</p>
+                </div>
+              `;
+    }
+
+    function renderModule(module, query) {
+      if (typeof query !== "string") {
+        query = null;
+      }
+
+      module.members.forEach((m) => (m.module = module));
+
+      return `
+                <div class="module">
+                  <h2>Module: <code>${module.name}</code></h2>
+                  <div class="members">
+                    ${
+                      query
+                        ? module.members
+                            .filter((m) =>
+                              m.name.toLowerCase().includes(query.toLowerCase())
+                            )
+                            .map(renderFunction)
+                            .join("")
+                        : module.members.map(renderFunction).join("")
+                    }
+                  </div>
+                </div>
+              `;
+    }
+
+    function render(query) {
+      if (!query) {
+        document.querySelector("main").innerHTML = modules
+          .map(renderModule)
+          .join("");
+        return;
+      }
+      const isFuncQuery = query.includes(":");
+
+      const module = modules.filter((m) =>
+        m.name.toLowerCase().includes(query.split(":")[0].toLowerCase())
+      );
+
+      if (module && !isFuncQuery) {
+        document.querySelector("main").innerHTML = module
+          .map(renderModule)
+          .join("");
+        return;
+      }
+
+      const funcQuery = query.split(":")[1];
+
+      if (module && funcQuery) {
+        document.querySelector("main").innerHTML = module.map((m) => {
+          return renderModule(m, funcQuery);
+        });
+      }
+    }
+
+    render();
+  </script>
+</html>
