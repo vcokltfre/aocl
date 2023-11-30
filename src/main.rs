@@ -1,6 +1,6 @@
 use std::fs;
 
-use stdlib::{array, convert, file, std as aoclstd, string, test};
+use stdlib::{array, convert, file, math, std as aoclstd, string, test};
 
 mod errors;
 mod frontend;
@@ -37,6 +37,7 @@ fn main() {
     array::register(&mut vm);
     convert::register(&mut vm);
     file::register(&mut vm);
+    math::register(&mut vm);
     aoclstd::register(&mut vm);
     string::register(&mut vm);
     test::register(&mut vm);
