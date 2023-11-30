@@ -1,6 +1,6 @@
 use std::fs;
 
-use stdlib::{array, file, test};
+use stdlib::{array, file, string, test};
 
 mod errors;
 mod frontend;
@@ -36,6 +36,7 @@ fn main() {
 
     array::register(&mut vm);
     file::register(&mut vm);
+    string::register(&mut vm);
     test::register(&mut vm);
 
     if let Err(e) = vm.run() {
