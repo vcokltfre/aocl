@@ -34,12 +34,6 @@ impl Lexer {
                 break;
             }
 
-            if tokens.len() >= 1 && tokens[tokens.len() - 1].token_type == TokenType::EOS {
-                if token.token_type == TokenType::EOS {
-                    continue;
-                }
-            }
-
             tokens.push(token);
         }
 
@@ -50,6 +44,7 @@ impl Lexer {
             if token.token_type != TokenType::EOS {
                 run.push(token);
             } else {
+                run.push(token);
                 runs.push(run);
                 run = Vec::<Token>::new();
             }
@@ -58,7 +53,7 @@ impl Lexer {
         let mut combined_tokens = Vec::<Token>::new();
 
         for run in runs {
-            if run.len() != 2 {
+            if run.len() != 3 {
                 combined_tokens.append(&mut run.clone());
                 continue;
             }
@@ -120,21 +115,7 @@ impl Lexer {
             "".to_string(),
         ));
 
-        let mut final_tokens = Vec::<Token>::new();
-        let mut skip_eos = false;
-
-        for token in combined_tokens {
-            if token.token_type == TokenType::EOS && skip_eos {
-                continue;
-            } else if token.token_type == TokenType::EOS {
-                skip_eos = true;
-            } else {
-                skip_eos = false;
-            }
-            final_tokens.push(token);
-        }
-
-        Ok(final_tokens)
+        Ok(combined_tokens)
     }
 
     fn error(&self, message: String) -> Error {

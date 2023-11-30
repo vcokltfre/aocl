@@ -107,6 +107,7 @@ pub enum StatementContext {
     Call(CallTarget, Vec<Value>),
     CallLabel(String),
     Ret,
+    EOS,
 }
 
 impl StatementContext {
@@ -146,6 +147,7 @@ impl StatementContext {
             }
             StatementContext::CallLabel(identifier) => format!("call {}", identifier),
             StatementContext::Ret => "ret".to_string(),
+            StatementContext::EOS => "".to_string(),
         }
     }
 }

@@ -77,15 +77,17 @@ impl Parser {
         let tokens = self.get_statement()?;
 
         if !tokens[2].is_value() {
-            return Err(
-                tokens[1].error(format!("Expected value, found {:?}", tokens[1].token_type))
-            );
+            return Err(tokens[1].error(format!(
+                "Expected value, found {:?} (binop:0)",
+                tokens[1].token_type
+            )));
         }
 
         if !tokens[4].is_value() {
-            return Err(
-                tokens[1].error(format!("Expected value, found {:?}", tokens[1].token_type))
-            );
+            return Err(tokens[1].error(format!(
+                "Expected value, found {:?} (binop:1)",
+                tokens[1].token_type
+            )));
         }
 
         self.current += 6;
@@ -160,9 +162,10 @@ impl Parser {
 
         for i in 0..argl {
             if !tokens[6 + i].is_value() {
-                return Err(
-                    tokens[1].error(format!("Expected value, found {:?}", tokens[1].token_type))
-                );
+                return Err(tokens[1].error(format!(
+                    "Expected value, found {:?} (call: 0)",
+                    tokens[1].token_type
+                )));
             }
 
             values.push(match tokens[6 + i].token_type.clone() {
@@ -480,6 +483,15 @@ impl Parser {
             TokenType::Identifier(_) => self.parse_assign(),
             TokenType::Call => self.parse_call_label(),
             TokenType::Ret => self.parse_ret(),
+            TokenType::EOS => {
+                self.current += 1;
+
+                Ok(Statement {
+                    context: StatementContext::EOS,
+                    file: token.file.clone(),
+                    line: token.line,
+                })
+            }
 
             _ => Err(token.error(format!("Unexpected token"))),
         }
@@ -493,7 +505,13 @@ impl Parser {
                 break;
             }
 
-            statements.push(self.parse_statement()?);
+            let statement = self.parse_statement()?;
+
+            if statement.context == StatementContext::EOS {
+                continue;
+            }
+
+            statements.push(statement);
         }
 
         Ok(statements)

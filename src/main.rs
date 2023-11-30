@@ -26,10 +26,6 @@ fn main() {
 
     let tokens = tokens.unwrap();
 
-    for token in tokens.clone() {
-        println!("{:?}", token);
-    }
-
     let mut parser = frontend::parser::Parser::new(tokens);
     let program = parser.parse();
 

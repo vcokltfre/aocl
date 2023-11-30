@@ -103,6 +103,7 @@ impl VM {
             StatementContext::Call(call_target, args) => self.op_call(call_target, args),
             StatementContext::CallLabel(label) => self.op_call_label(label),
             StatementContext::Ret => self.op_ret(),
+            StatementContext::EOS => Err("unexpected end of statement".to_string()),
         };
 
         if let Err(e) = res {

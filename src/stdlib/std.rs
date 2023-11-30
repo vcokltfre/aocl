@@ -133,8 +133,19 @@ pub fn std_filter(
     Ok(Some(VMValue::Array(new_array)))
 }
 
+pub fn std_getargs(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    _args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    let args: Vec<VMValue> = std::env::args().map(VMValue::String).collect();
+
+    Ok(Some(VMValue::Array(args[1..].to_vec())))
+}
+
 pub fn register(vm: &mut VM) {
     vm.register("std".to_string(), "map".to_string(), std_map);
     vm.register("std".to_string(), "mapdrop".to_string(), std_mapdrop);
     vm.register("std".to_string(), "filter".to_string(), std_filter);
+    vm.register("std".to_string(), "getargs".to_string(), std_getargs);
 }
