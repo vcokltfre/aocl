@@ -1,0 +1,30 @@
+data = @file:read "./example/input"
+elves = @string:split data "\n\n"
+elves_n = @array:len elves
+
+current = 0
+current_total = 0
+
+totals = @array:new
+
+~loop
+
+elf = @array:get elves current
+elf_lines = @string:split elf "\n"
+elf_lines = @std:filter "string" "notempty" elf_lines
+
+elf_lines_int = @std:map "convert" "atoi" elf_lines
+elf_total = @math:sum elf_lines_int
+
+@array:push totals elf_total
+
+current = current + 1
+
+goto end if current == elves_n
+goto loop
+
+~end
+
+max = @math:max totals
+
+@io:println max
