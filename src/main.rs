@@ -1,7 +1,10 @@
 use std::fs;
 
+use stdlib::array;
+
 mod errors;
 mod frontend;
+mod stdlib;
 mod vm;
 
 fn main() {
@@ -30,6 +33,8 @@ fn main() {
     }
 
     let mut vm = vm::VM::new(program.unwrap());
+
+    array::register(&mut vm);
 
     if let Err(e) = vm.run() {
         println!("{}", e);

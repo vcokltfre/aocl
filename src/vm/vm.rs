@@ -7,7 +7,7 @@ use crate::{
 
 use super::VMValue;
 
-pub type VMFunc = fn(&mut VM, Vec<VMValue>) -> Result<Option<VMValue>, String>;
+pub type VMFunc = fn(&mut VM, Vec<Option<String>>, Vec<VMValue>) -> Result<Option<VMValue>, String>;
 
 pub struct VM {
     pub statements: Vec<Statement>,
@@ -36,12 +36,13 @@ impl VM {
         &mut self,
         module: String,
         name: String,
+        idts: Vec<Option<String>>,
         args: Vec<VMValue>,
     ) -> Result<Option<VMValue>, String> {
         let func = self.funcs.get(&format!("{}:{}", module, name));
 
         if let Some(func) = func {
-            match func(self, args) {
+            match func(self, idts, args) {
                 Ok(value) => return Ok(value),
                 Err(e) => return Err(e),
             }
@@ -51,10 +52,14 @@ impl VM {
     }
 
     pub fn run(&mut self) -> Result<(), Error> {
-        self.register("vm".to_string(), "debug".to_string(), |_self, args| {
-            println!("{:?}", args);
-            Ok(None)
-        });
+        self.register(
+            "vm".to_string(),
+            "debug".to_string(),
+            |_self, _idents, args| {
+                println!("{:?}", args);
+                Ok(None)
+            },
+        );
 
         for (i, statement) in self.statements.iter().enumerate() {
             if let StatementContext::GotoDef(identifier) = statement.context.clone() {
@@ -162,15 +167,19 @@ impl VM {
         args: Vec<Value>,
     ) -> Result<(), String> {
         let mut vmargs = Vec::<VMValue>::new();
+        let mut idts = Vec::new();
 
         for value in args {
             if let Value::Identifier(identifier) = value.clone() {
                 if let Some(value) = self.variables.get(&identifier) {
                     vmargs.push(value.clone());
+                    idts.push(Some(identifier));
                     continue;
                 } else {
                     return Err(format!("variable not found: {}", identifier));
                 }
+            } else {
+                idts.push(None);
             }
 
             vmargs.push(VMValue::from(value));
@@ -179,6 +188,7 @@ impl VM {
         let value = self.call(
             call_target.module.clone(),
             call_target.function.clone(),
+            idts,
             vmargs,
         )?;
 
@@ -250,21 +260,25 @@ impl VM {
 
     fn op_call(&mut self, target: CallTarget, values: Vec<Value>) -> Result<(), String> {
         let mut args = Vec::new();
+        let mut idts = Vec::new();
 
         for value in values {
             if let Value::Identifier(identifier) = value.clone() {
                 if let Some(value) = self.variables.get(&identifier) {
                     args.push(value.clone());
+                    idts.push(Some(identifier));
                     continue;
                 } else {
                     return Err(format!("variable not found: {}", identifier));
                 }
+            } else {
+                idts.push(None);
             }
 
             args.push(VMValue::from(value));
         }
 
-        self.call(target.module, target.function, args)?;
+        self.call(target.module, target.function, idts, args)?;
 
         Ok(())
     }

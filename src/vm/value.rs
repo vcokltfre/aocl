@@ -1,6 +1,6 @@
 use crate::frontend::parser::Value;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, PartialOrd)]
 pub enum VMValue {
     Bool(bool),
     Int(i64),
@@ -8,6 +8,22 @@ pub enum VMValue {
     String(String),
     Identifier(String),
     Array(Vec<VMValue>),
+}
+
+impl Eq for VMValue {}
+
+impl Ord for VMValue {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match (self, other) {
+            (Self::Int(left), Self::Int(right)) => left.cmp(right),
+            (Self::Float(left), Self::Float(right)) => left.partial_cmp(right).unwrap(),
+            (Self::Int(left), Self::Float(right)) => (*left as f64).partial_cmp(right).unwrap(),
+            (Self::Float(left), Self::Int(right)) => left.partial_cmp(&(*right as f64)).unwrap(),
+            (Self::String(left), Self::String(right)) => left.cmp(right),
+            (Self::Bool(left), Self::Bool(right)) => left.cmp(right),
+            _ => panic!("cannot compare {} and {}", self.name(), other.name()),
+        }
+    }
 }
 
 impl VMValue {
@@ -179,7 +195,7 @@ impl VMValue {
         }
     }
 
-    fn name(&self) -> String {
+    pub fn name(&self) -> String {
         match self {
             Self::Bool(_) => "bool",
             Self::Int(_) => "int",
