@@ -15,19 +15,17 @@ pub enum TokenType {
     If,     // if
 
     // Single-character tokens
-    LBracket, // [
-    RBracket, // ]
-    Colon,    // :
-    Equals,   // =
-    At,       // @
-    Tilde,    // ~
-    Plus,     // +
-    Minus,    // -
-    Star,     // *
-    Slash,    // /
-    Percent,  // %
-    Less,     // <
-    Greater,  // >
+    Colon,   // :
+    Equals,  // =
+    At,      // @
+    Tilde,   // ~
+    Plus,    // +
+    Minus,   // -
+    Star,    // *
+    Slash,   // /
+    Percent, // %
+    Less,    // <
+    Greater, // >
 
     // Two-character tokens
     EqualsEquals,  // ==
@@ -83,7 +81,50 @@ impl Token {
             self.file.clone(),
             message,
             self.context.clone(),
-            crate::errors::ErrorLocation::Lexer,
+            crate::errors::ErrorLocation::Parser,
         )
+    }
+
+    pub fn is_literal(&self) -> bool {
+        match self.token_type {
+            TokenType::Bool(_) | TokenType::Int(_) | TokenType::Float(_) | TokenType::String(_) => {
+                true
+            }
+            _ => false,
+        }
+    }
+
+    pub fn is_identifier(&self) -> bool {
+        match self.token_type {
+            TokenType::Identifier(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_value(&self) -> bool {
+        self.is_literal() || self.is_identifier()
+    }
+
+    pub fn is_compare(&self) -> bool {
+        match self.token_type {
+            TokenType::EqualsEquals
+            | TokenType::BangEquals
+            | TokenType::LessEquals
+            | TokenType::GreaterEquals
+            | TokenType::Less
+            | TokenType::Greater => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_binop(&self) -> bool {
+        match self.token_type {
+            TokenType::Plus
+            | TokenType::Minus
+            | TokenType::Star
+            | TokenType::Slash
+            | TokenType::Percent => true,
+            _ => false,
+        }
     }
 }

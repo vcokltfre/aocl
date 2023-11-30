@@ -27,12 +27,19 @@ impl Lexer {
     }
 
     pub fn tokenise(&mut self) -> Result<Vec<Token>, Error> {
-        let mut tokens = Vec::new();
+        let mut tokens = Vec::<Token>::new();
         loop {
             let token = self.get_token()?;
             if token.token_type == TokenType::EOF {
                 break;
             }
+
+            if tokens.len() >= 1 && tokens[tokens.len() - 1].token_type == TokenType::EOS {
+                if token.token_type == TokenType::EOS {
+                    continue;
+                }
+            }
+
             tokens.push(token);
         }
         Ok(tokens)
@@ -116,8 +123,8 @@ impl Lexer {
         }
 
         match c.unwrap() {
-            ' ' | '\t' | '\r' | '\n' | '[' | ']' | '=' | '+' | '-' | '*' | '/' | '%' | '!'
-            | '>' | '<' | ':' | '~' | '@' => true,
+            ' ' | '\t' | '\r' | '\n' | '=' | '+' | '-' | '*' | '/' | '%' | '!' | '>' | '<'
+            | ':' | '~' | '@' => true,
             _ => false,
         }
     }
@@ -281,8 +288,6 @@ impl Lexer {
             '=' => Ok(self.make_token(TokenType::Equals, 1)),
             '<' => Ok(self.make_token(TokenType::Less, 1)),
             '>' => Ok(self.make_token(TokenType::Greater, 1)),
-            '[' => Ok(self.make_token(TokenType::LBracket, 1)),
-            ']' => Ok(self.make_token(TokenType::RBracket, 1)),
             '@' => Ok(self.make_token(TokenType::At, 1)),
             '~' => Ok(self.make_token(TokenType::Tilde, 1)),
             ':' => Ok(self.make_token(TokenType::Colon, 1)),
@@ -358,7 +363,7 @@ impl Lexer {
                 self.advance();
                 Ok(self.make_token(TokenType::Minus, 1))
             }
-            '+' | '*' | '/' | '%' | '!' | '=' | '<' | '>' | '[' | ']' | '@' | '~' | ':' | '\n' => {
+            '+' | '*' | '/' | '%' | '!' | '=' | '<' | '>' | '@' | '~' | ':' | '\n' => {
                 self.get_multi()
             }
             '0'..='9' => self.get_number(),
