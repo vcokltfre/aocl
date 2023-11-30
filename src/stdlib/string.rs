@@ -104,6 +104,46 @@ pub fn string_contains(
     Ok(Some(VMValue::Bool(string.contains(substring))))
 }
 
+pub fn string_length(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() != 1 {
+        return Err(format!("expected 1 argument, got {}", args.len()));
+    }
+
+    let string = match &args[0] {
+        VMValue::String(string) => string,
+        _ => return Err(format!("expected string, got {}", args[0].name())),
+    };
+
+    Ok(Some(VMValue::Int(string.len() as i64)))
+}
+
+pub fn string_toarray(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() != 1 {
+        return Err(format!("expected 1 argument, got {}", args.len()));
+    }
+
+    let string = match &args[0] {
+        VMValue::String(string) => string,
+        _ => return Err(format!("expected string, got {}", args[0].name())),
+    };
+
+    let mut array = Vec::new();
+
+    for c in string.chars() {
+        array.push(VMValue::String(c.to_string()));
+    }
+
+    Ok(Some(VMValue::Array(array)))
+}
+
 pub fn register(vm: &mut VM) {
     vm.register("string".to_string(), "split".to_string(), string_split);
     vm.register("string".to_string(), "join".to_string(), string_join);
@@ -117,4 +157,6 @@ pub fn register(vm: &mut VM) {
         "contains".to_string(),
         string_contains,
     );
+    vm.register("string".to_string(), "length".to_string(), string_length);
+    vm.register("string".to_string(), "toarray".to_string(), string_toarray);
 }

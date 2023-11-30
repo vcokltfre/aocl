@@ -607,6 +607,24 @@
             description: "True if the string contains the substring.",
           }
         ),
+        makeFunction(
+          "len",
+          "Gets the length of a string.",
+          [makeParam("str", "string", "The string to get the length of.")],
+          {
+            type: "int",
+            description: "The length of the string.",
+          }
+        ),
+        makeFunction(
+          "toarray",
+          "Converts a string to an array of characters.",
+          [makeParam("str", "string", "The string to convert.")],
+          {
+            type: "array",
+            description: "The array of characters.",
+          }
+        ),
       ],
     };
 
