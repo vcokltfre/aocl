@@ -1,0 +1,34 @@
+{
+  "name": "aocl",
+  "displayName": "AOCL",
+  "description": "vcokltfre/aocl syntax support",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "aocl",
+        "aliases": [
+          "aocl",
+          "aocl"
+        ],
+        "extensions": [
+          ".aocl"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "aocl",
+        "scopeName": "source.aocl",
+        "path": "./syntaxes/aocl.tmLanguage.json"
+      }
+    ]
+  }
+}
