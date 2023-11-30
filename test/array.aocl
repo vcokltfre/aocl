@@ -42,3 +42,10 @@ cloned_third = @array:get cloned 2
 @test:is cloned_first 3
 @test:is cloned_second 1
 @test:is cloned_third 0
+
+same = @array:is arr cloned
+@test:is same true
+
+@array:push arr 1
+same = @array:is arr cloned
+@test:is same false

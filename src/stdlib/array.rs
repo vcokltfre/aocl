@@ -225,6 +225,28 @@ pub fn array_clone(
     Ok(Some(VMValue::Array(array.clone())))
 }
 
+pub fn array_is(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() != 2 {
+        return Err(format!("expected 2 arguments, got {}", args.len()));
+    }
+
+    let array1 = match &args[0] {
+        VMValue::Array(array) => array,
+        _ => return Err(format!("expected array, got {}", args[0].name())),
+    };
+
+    let array2 = match &args[1] {
+        VMValue::Array(array) => array,
+        _ => return Err(format!("expected array, got {}", args[1].name())),
+    };
+
+    Ok(Some(VMValue::Bool(array1 == array2)))
+}
+
 pub fn register(vm: &mut VM) {
     vm.register("array".to_string(), "new".to_string(), array_new);
     vm.register("array".to_string(), "get".to_string(), array_get);
@@ -236,4 +258,5 @@ pub fn register(vm: &mut VM) {
     vm.register("array".to_string(), "sort".to_string(), array_sort);
     vm.register("array".to_string(), "len".to_string(), array_len);
     vm.register("array".to_string(), "clone".to_string(), array_clone);
+    vm.register("array".to_string(), "is".to_string(), array_is);
 }
