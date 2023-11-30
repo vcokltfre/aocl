@@ -14,6 +14,26 @@ pub fn io_print(
     Ok(None)
 }
 
+pub fn io_printf(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() < 1 {
+        return Err(format!("expected at least 1 argument, got {}", args.len()));
+    }
+
+    let mut string = args[0].to_string();
+
+    for arg in &args[1..] {
+        string = string.replace("{}", &arg.to_string());
+    }
+
+    print!("{}", string);
+
+    Ok(None)
+}
+
 pub fn io_println(
     _vm: &mut VM,
     _idts: Vec<Option<String>>,
@@ -38,6 +58,24 @@ pub fn io_sprint(
     }
 
     Ok(Some(VMValue::String(args[0].to_string())))
+}
+
+pub fn io_sprintf(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() < 1 {
+        return Err(format!("expected at least 1 argument, got {}", args.len()));
+    }
+
+    let mut string = args[0].to_string();
+
+    for arg in &args[1..] {
+        string = string.replace("{}", &arg.to_string());
+    }
+
+    Ok(Some(VMValue::String(string)))
 }
 
 pub fn io_read(
@@ -70,8 +108,10 @@ pub fn io_readln(
 
 pub fn register(vm: &mut VM) {
     vm.register("io".to_string(), "print".to_string(), io_print);
+    vm.register("io".to_string(), "printf".to_string(), io_printf);
     vm.register("io".to_string(), "println".to_string(), io_println);
     vm.register("io".to_string(), "sprint".to_string(), io_sprint);
+    vm.register("io".to_string(), "sprintf".to_string(), io_sprintf);
     vm.register("io".to_string(), "read".to_string(), io_read);
     vm.register("io".to_string(), "readln".to_string(), io_readln);
 }
