@@ -1,0 +1,44 @@
+arr = @array:new
+
+arr_len = @array:len arr
+@test:is arr_len 0
+
+@array:push arr 1
+arr_len = @array:len arr
+@test:is arr_len 1
+
+arr_el = @array:get arr 0
+@test:is arr_el 1
+
+@array:pop arr
+arr_len = @array:len arr
+@test:is arr_len 0
+
+@array:push arr 1
+@array:push arr 2
+@array:push arr 3
+@array:popat arr 1
+arr_first = @array:get arr 0
+arr_second = @array:get arr 1
+@test:is arr_first 1
+@test:is arr_second 3
+
+arr_idx = @array:index arr 3
+@test:is arr_idx 1
+
+@array:push arr 0
+@array:sort arr
+arr_first = @array:get arr 0
+@test:is arr_first 0
+
+@array:reverse arr
+arr_first = @array:get arr 0
+@test:is arr_first 3
+
+cloned = @array:clone arr
+cloned_first = @array:get cloned 0
+cloned_second = @array:get cloned 1
+cloned_third = @array:get cloned 2
+@test:is cloned_first 3
+@test:is cloned_second 1
+@test:is cloned_third 0
