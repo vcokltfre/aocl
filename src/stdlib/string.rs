@@ -104,7 +104,7 @@ pub fn string_contains(
     Ok(Some(VMValue::Bool(string.contains(substring))))
 }
 
-pub fn string_length(
+pub fn string_len(
     _vm: &mut VM,
     _idts: Vec<Option<String>>,
     args: Vec<VMValue>,
@@ -157,6 +157,6 @@ pub fn register(vm: &mut VM) {
         "contains".to_string(),
         string_contains,
     );
-    vm.register("string".to_string(), "length".to_string(), string_length);
+    vm.register("string".to_string(), "len".to_string(), string_len);
     vm.register("string".to_string(), "toarray".to_string(), string_toarray);
 }
