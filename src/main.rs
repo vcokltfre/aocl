@@ -2,6 +2,7 @@ use std::fs;
 
 mod errors;
 mod frontend;
+mod vm;
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
@@ -10,7 +11,7 @@ fn main() {
         return;
     }
 
-    let data = fs::read_to_string(args[1].clone()).unwrap();
+    let data = fs::read_to_string(args[1].clone()).unwrap() + "\n";
 
     let mut lexer = frontend::lexer::Lexer::new(args[1].clone(), data);
     let tokens = lexer.tokenise();
@@ -28,7 +29,10 @@ fn main() {
         return;
     }
 
-    for statement in program.unwrap() {
-        println!("{}", statement.rewrite());
+    let mut vm = vm::VM::new(program.unwrap());
+
+    if let Err(e) = vm.run() {
+        println!("{}", e);
+        return;
     }
 }

@@ -10,9 +10,8 @@ pub enum TokenType {
     Identifier(String), // /[a-zA-Z0-9_]+/
 
     // Keywords
-    Import, // import
-    Goto,   // goto
-    If,     // if
+    Goto, // goto
+    If,   // if
 
     // Single-character tokens
     Colon,   // :

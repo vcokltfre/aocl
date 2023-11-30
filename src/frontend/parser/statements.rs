@@ -97,8 +97,7 @@ impl CallTarget {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Statement {
-    Import(String),
+pub enum StatementContext {
     AssignLiteral(String, Value),
     AssignBinOp(String, BinOp),
     AssignCall(String, CallTarget, Vec<Value>),
@@ -108,17 +107,16 @@ pub enum Statement {
     Call(CallTarget, Vec<Value>),
 }
 
-impl Statement {
+impl StatementContext {
     pub fn rewrite(&self) -> String {
         match self {
-            Statement::Import(module) => format!("import {}", module),
-            Statement::AssignLiteral(identifier, value) => {
+            StatementContext::AssignLiteral(identifier, value) => {
                 format!("{} = {}", identifier, value.rewrite())
             }
-            Statement::AssignBinOp(identifier, binop) => {
+            StatementContext::AssignBinOp(identifier, binop) => {
                 format!("{} = {}", identifier, binop.rewrite())
             }
-            Statement::AssignCall(identifier, call_target, args) => {
+            StatementContext::AssignCall(identifier, call_target, args) => {
                 format!(
                     "{} = {} {}",
                     identifier,
@@ -129,12 +127,12 @@ impl Statement {
                         .join(" ")
                 )
             }
-            Statement::GotoDef(identifier) => format!("~{}", identifier),
-            Statement::Goto(identifier) => format!("goto {}", identifier),
-            Statement::GotoIf(identifier, compare) => {
+            StatementContext::GotoDef(identifier) => format!("~{}", identifier),
+            StatementContext::Goto(identifier) => format!("goto {}", identifier),
+            StatementContext::GotoIf(identifier, compare) => {
                 format!("goto {} if {}", identifier, compare.rewrite())
             }
-            Statement::Call(call_target, args) => {
+            StatementContext::Call(call_target, args) => {
                 format!(
                     "{} {}",
                     call_target.rewrite(),
@@ -145,5 +143,30 @@ impl Statement {
                 )
             }
         }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Statement {
+    pub line: usize,
+    pub file: String,
+
+    pub context: StatementContext,
+}
+
+impl Statement {
+    pub fn error(&self, message: String) -> crate::errors::Error {
+        let line = self.context.rewrite();
+
+        crate::errors::Error::new(
+            self.line,
+            1,
+            0,
+            line.len(),
+            self.file.clone(),
+            message,
+            line,
+            crate::errors::ErrorLocation::Interpreter,
+        )
     }
 }

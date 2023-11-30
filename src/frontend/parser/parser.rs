@@ -1,7 +1,7 @@
 use crate::errors::Error;
 use crate::frontend::lexer::{Token, TokenType};
 
-use super::{BinOp, Compare, Statement, Value};
+use super::{BinOp, Compare, Statement, StatementContext, Value};
 
 pub struct Parser {
     pub tokens: Vec<Token>,
@@ -15,7 +15,7 @@ impl Parser {
         Self { tokens, current: 0 }
     }
 
-    pub fn get_statement(&self) -> Result<Vec<Token>, Error> {
+    fn get_statement(&self) -> Result<Vec<Token>, Error> {
         let next_end = self.tokens[self.current..]
             .iter()
             .position(|t| t.token_type == TokenType::EOS);
@@ -27,7 +27,7 @@ impl Parser {
         }
     }
 
-    pub fn require(&self, n: usize) -> Result<Vec<Token>, Error> {
+    fn require(&self, n: usize) -> Result<Vec<Token>, Error> {
         let stmt = self.get_statement()?;
         if stmt.len() != n {
             return Err(self.tokens[self.current].error("Incomplete statement".to_string()));
@@ -36,27 +36,7 @@ impl Parser {
         Ok(stmt)
     }
 
-    pub fn parse_import(&mut self) -> ParseResult {
-        let tokens = self.require(3)?;
-
-        if !tokens[1].is_identifier() {
-            return Err(tokens[1].error(format!(
-                "Expected identifier, found {:?}",
-                tokens[1].token_type
-            )));
-        }
-
-        self.current += 3;
-
-        let name = match tokens[1].token_type.clone() {
-            TokenType::Identifier(name) => name,
-            _ => unreachable!(),
-        };
-
-        Ok(Statement::Import(name))
-    }
-
-    pub fn parse_assign_literal(&mut self) -> ParseResult {
+    fn parse_assign_literal(&mut self) -> ParseResult {
         let tokens = self.get_statement()?;
 
         if tokens[1].token_type != TokenType::Equals {
@@ -86,10 +66,14 @@ impl Parser {
             _ => unreachable!(),
         };
 
-        Ok(Statement::AssignLiteral(name, value))
+        Ok(Statement {
+            context: StatementContext::AssignLiteral(name, value),
+            file: tokens[0].file.clone(),
+            line: tokens[0].line,
+        })
     }
 
-    pub fn parse_assign_binop(&mut self) -> ParseResult {
+    fn parse_assign_binop(&mut self) -> ParseResult {
         let tokens = self.get_statement()?;
 
         if !tokens[2].is_value() {
@@ -138,10 +122,14 @@ impl Parser {
             _ => unreachable!(),
         };
 
-        Ok(Statement::AssignBinOp(name, binop))
+        Ok(Statement {
+            context: StatementContext::AssignBinOp(name, binop),
+            file: tokens[0].file.clone(),
+            line: tokens[0].line,
+        })
     }
 
-    pub fn parse_assign_call(&mut self) -> ParseResult {
+    fn parse_assign_call(&mut self) -> ParseResult {
         let tokens = self.get_statement()?;
 
         if tokens[2].token_type != TokenType::At {
@@ -204,17 +192,21 @@ impl Parser {
             _ => unreachable!(),
         };
 
-        Ok(Statement::AssignCall(
-            name,
-            crate::frontend::parser::CallTarget {
-                module: module_name,
-                function: function_name,
-            },
-            values,
-        ))
+        Ok(Statement {
+            context: StatementContext::AssignCall(
+                name,
+                crate::frontend::parser::CallTarget {
+                    module: module_name,
+                    function: function_name,
+                },
+                values,
+            ),
+            file: tokens[0].file.clone(),
+            line: tokens[0].line,
+        })
     }
 
-    pub fn parse_assign(&mut self) -> ParseResult {
+    fn parse_assign(&mut self) -> ParseResult {
         let tokens = self.get_statement()?;
 
         if tokens[1].token_type != TokenType::Equals {
@@ -234,7 +226,7 @@ impl Parser {
         Err(tokens[1].error("Invalid assignment".to_string()))
     }
 
-    pub fn parse_goto_def(&mut self) -> ParseResult {
+    fn parse_goto_def(&mut self) -> ParseResult {
         let tokens = self.require(3)?;
 
         if !tokens[1].is_identifier() {
@@ -251,10 +243,14 @@ impl Parser {
             _ => unreachable!(),
         };
 
-        Ok(Statement::GotoDef(name))
+        Ok(Statement {
+            context: StatementContext::GotoDef(name),
+            file: tokens[0].file.clone(),
+            line: tokens[0].line,
+        })
     }
 
-    pub fn parse_goto_always(&mut self) -> ParseResult {
+    fn parse_goto_always(&mut self) -> ParseResult {
         let tokens = self.get_statement()?;
 
         if !tokens[1].is_identifier() {
@@ -271,10 +267,14 @@ impl Parser {
             _ => unreachable!(),
         };
 
-        Ok(Statement::Goto(name))
+        Ok(Statement {
+            context: StatementContext::Goto(name),
+            file: tokens[0].file.clone(),
+            line: tokens[0].line,
+        })
     }
 
-    pub fn parse_goto_if(&mut self) -> ParseResult {
+    fn parse_goto_if(&mut self) -> ParseResult {
         let tokens = self.get_statement()?;
 
         if !tokens[1].is_identifier() {
@@ -342,10 +342,14 @@ impl Parser {
             _ => unreachable!(),
         };
 
-        Ok(Statement::GotoIf(goto_name, compare))
+        Ok(Statement {
+            context: StatementContext::GotoIf(goto_name, compare),
+            file: tokens[0].file.clone(),
+            line: tokens[0].line,
+        })
     }
 
-    pub fn parse_goto(&mut self) -> ParseResult {
+    fn parse_goto(&mut self) -> ParseResult {
         let tokens = self.get_statement()?;
 
         if !tokens[1].is_identifier() {
@@ -364,7 +368,7 @@ impl Parser {
         Err(tokens[1].error("Invalid goto statement".to_string()))
     }
 
-    pub fn parse_call(&mut self) -> ParseResult {
+    fn parse_call(&mut self) -> ParseResult {
         let tokens = self.get_statement()?;
 
         if !tokens[1].is_identifier() {
@@ -412,25 +416,28 @@ impl Parser {
             _ => unreachable!(),
         };
 
-        let function_name = match tokens[1].token_type.clone() {
+        let function_name = match tokens[3].token_type.clone() {
             TokenType::Identifier(name) => name,
             _ => unreachable!(),
         };
 
-        return Ok(Statement::Call(
-            crate::frontend::parser::CallTarget {
-                module: module_name,
-                function: function_name,
-            },
-            values,
-        ));
+        return Ok(Statement {
+            context: StatementContext::Call(
+                crate::frontend::parser::CallTarget {
+                    module: module_name,
+                    function: function_name,
+                },
+                values,
+            ),
+            file: tokens[0].file.clone(),
+            line: tokens[0].line,
+        });
     }
 
-    pub fn parse_statement(&mut self) -> ParseResult {
+    fn parse_statement(&mut self) -> ParseResult {
         let token = self.tokens[self.current].clone();
 
         match token.token_type {
-            TokenType::Import => self.parse_import(),
             TokenType::Tilde => self.parse_goto_def(),
             TokenType::At => self.parse_call(),
             TokenType::Goto => self.parse_goto(),
