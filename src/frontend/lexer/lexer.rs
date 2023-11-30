@@ -42,7 +42,99 @@ impl Lexer {
 
             tokens.push(token);
         }
-        Ok(tokens)
+
+        let mut runs = Vec::<Vec<Token>>::new();
+        let mut run = Vec::<Token>::new();
+
+        for token in tokens {
+            if token.token_type != TokenType::EOS {
+                run.push(token);
+            } else {
+                runs.push(run);
+                run = Vec::<Token>::new();
+            }
+        }
+
+        let mut combined_tokens = Vec::<Token>::new();
+
+        for run in runs {
+            if run.len() != 2 {
+                combined_tokens.append(&mut run.clone());
+                continue;
+            }
+
+            if !run[0].clone().is_identifier() {
+                combined_tokens.append(&mut run.clone());
+                continue;
+            }
+
+            if !run[1].is_string() {
+                combined_tokens.append(&mut run.clone());
+                continue;
+            }
+
+            let ident_name = match run[0].clone().token_type {
+                TokenType::Identifier(s) => s,
+                _ => unreachable!(),
+            };
+
+            if ident_name != "import" {
+                combined_tokens.append(&mut run.clone());
+                continue;
+            }
+
+            let filename = match run[1].clone().token_type {
+                TokenType::String(s) => s,
+                _ => unreachable!(),
+            };
+
+            let data = std::fs::read_to_string(filename.clone());
+            if data.is_err() {
+                return Err(self.error(format!(
+                    "Failed to import file '{}': {}",
+                    filename,
+                    data.err().unwrap()
+                )));
+            }
+
+            let mut lexer = Lexer::new(filename.clone(), data.unwrap());
+            let tokens = lexer.tokenise();
+
+            match tokens {
+                Ok(tokens) => {
+                    combined_tokens.append(&mut tokens.clone());
+                }
+                Err(e) => {
+                    return Err(e);
+                }
+            }
+        }
+
+        combined_tokens.push(Token::new(
+            TokenType::EOS,
+            self.line as usize,
+            self.column as usize,
+            self.index as usize,
+            0,
+            self.filename.clone(),
+            "".to_string(),
+        ));
+
+        let mut final_tokens = Vec::<Token>::new();
+        let mut skip_eos = false;
+
+        for token in combined_tokens {
+            if token.token_type == TokenType::EOS && skip_eos {
+                continue;
+            } else if token.token_type == TokenType::EOS {
+                skip_eos = true;
+            } else {
+                skip_eos = false;
+            }
+            final_tokens.push(token);
+        }
+
+        Ok(final_tokens)
     }
 
     fn error(&self, message: String) -> Error {

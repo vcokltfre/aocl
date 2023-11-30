@@ -113,6 +113,16 @@ You may also `ret` from a call, which will pop the instruction pointer from the 
 ret
 ```
 
+## Imports
+
+Imports are written as follows:
+
+```aocl
+import "filepath"
+```
+
+Imports will include all tokens from the imported file into the current token stream.
+
 ## Examples
 
 ### Hello, world!

@@ -128,4 +128,11 @@ impl Token {
             _ => false,
         }
     }
+
+    pub fn is_string(&self) -> bool {
+        match self.token_type {
+            TokenType::String(_) => true,
+            _ => false,
+        }
+    }
 }
