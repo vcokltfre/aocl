@@ -591,6 +591,18 @@
             description: "True if the string is not empty.",
           }
         ),
+        makeFunction(
+          "contains",
+          "Returns true if the string contains a substring.",
+          [
+            makeParam("str", "string", "The string to check."),
+            makeParam("sub", "string", "The substring to check for."),
+          ],
+          {
+            type: "bool",
+            description: "True if the string contains the substring.",
+          }
+        ),
       ],
     };
 

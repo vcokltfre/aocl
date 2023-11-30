@@ -82,6 +82,28 @@ pub fn string_notempty(
     Ok(Some(VMValue::Bool(!string.is_empty())))
 }
 
+pub fn string_contains(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() != 2 {
+        return Err(format!("expected 2 arguments, got {}", args.len()));
+    }
+
+    let string = match &args[0] {
+        VMValue::String(string) => string,
+        _ => return Err(format!("expected string, got {}", args[0].name())),
+    };
+
+    let substring = match &args[1] {
+        VMValue::String(string) => string,
+        _ => return Err(format!("expected string, got {}", args[1].name())),
+    };
+
+    Ok(Some(VMValue::Bool(string.contains(substring))))
+}
+
 pub fn register(vm: &mut VM) {
     vm.register("string".to_string(), "split".to_string(), string_split);
     vm.register("string".to_string(), "join".to_string(), string_join);
@@ -89,5 +111,10 @@ pub fn register(vm: &mut VM) {
         "string".to_string(),
         "notempty".to_string(),
         string_notempty,
+    );
+    vm.register(
+        "string".to_string(),
+        "contains".to_string(),
+        string_contains,
     );
 }
