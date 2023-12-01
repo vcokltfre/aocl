@@ -1,0 +1,110 @@
+goto lib_dotenv_end__
+
+~lib_dotenv_load_from
+
+file__lib_dotenv = @stack:pop
+data__lib_dotenv = @file:read file__lib_dotenv
+lines__lib_dotenv = @string:split data__lib_dotenv "\n"
+
+goto lib_dotenv_load__
+
+~lib_dotenv_load
+
+data__lib_dotenv = @file:read ".env"
+lines__lib_dotenv = @string:split data__lib_dotenv "\n"
+
+goto lib_dotenv_load__
+
+~lib_dotenv_load__
+
+lines_num__lib_dotenv = @array:len lines__lib_dotenv
+current_line__lib_dotenv = 0
+
+~lib_dotenv_loop__
+
+goto lib_dotenv_done__ if current_line__lib_dotenv == lines_num__lib_dotenv
+
+line__lib_dotenv = @array:get lines__lib_dotenv current_line__lib_dotenv
+
+@stack:push line__lib_dotenv
+call lib_dotenv_sanitise__
+line__lib_dotenv = @stack:pop
+
+chars__lib_dotenv = @string:toarray line__lib_dotenv
+chars_num__lib_dotenv = @array:len chars__lib_dotenv
+
+goto lib_dotenv_loop_skip_push__ if chars_num__lib_dotenv == 0
+
+char__lib_dotenv = @array:get chars__lib_dotenv 0
+goto lib_dotenv_loop_skip_push__ if char__lib_dotenv == "#"
+
+@stack:push line__lib_dotenv
+call lib_dotenv_setenv__
+
+~lib_dotenv_loop_skip_push__
+
+current_line__lib_dotenv = current_line__lib_dotenv + 1
+goto lib_dotenv_loop__
+
+~lib_dotenv_done__
+
+ret
+
+~lib_dotenv_sanitise__
+
+line__lib_dotenv = @stack:pop
+chars__lib_dotenv = @string:toarray line__lib_dotenv
+builder__lib_dotenv = @array:new
+started__lib_dotenv = false
+
+goto lib_dotenv_sanitise_loop__
+~lib_dotenv_sanitise_loop_drop__
+
+@array:popat chars__lib_dotenv 0
+
+~lib_dotenv_sanitise_loop__
+
+chars_num__lib_dotenv = @array:len chars__lib_dotenv
+
+goto lib_dotenv_sanitise_done__ if chars_num__lib_dotenv == 0
+
+current__lib_dotenv = @array:get chars__lib_dotenv 0
+
+goto lib_dotenv_sanitise_started__ if started__lib_dotenv == true
+
+goto lib_dotenv_sanitise_loop_drop__ if current__lib_dotenv == " "
+goto lib_dotenv_sanitise_loop_drop__ if current__lib_dotenv == "\t"
+
+~lib_dotenv_sanitise_started__
+
+started__lib_dotenv = true
+@array:push builder__lib_dotenv current__lib_dotenv
+
+goto lib_dotenv_sanitise_loop_drop__
+
+~lib_dotenv_sanitise_done__
+
+line__lib_dotenv = @string:join builder__lib_dotenv ""
+@stack:push line__lib_dotenv
+
+ret
+
+~lib_dotenv_setenv__
+
+line__lib_dotenv = @stack:pop
+values__lib_dotenv = @string:split line__lib_dotenv "="
+values_len__lib_dotenv = @array:len values__lib_dotenv
+
+goto lib_dotenv_setenv_done__ if values_len__lib_dotenv == 0
+
+key__lib_dotenv = @array:get values__lib_dotenv 0
+@array:popat values__lib_dotenv 0
+value__lib_dotenv = @string:join values__lib_dotenv "="
+
+@std:setenv key__lib_dotenv value__lib_dotenv
+
+~lib_dotenv_setenv_done__
+
+ret
+
+~lib_dotenv_end__
