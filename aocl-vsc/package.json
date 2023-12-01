@@ -3,6 +3,8 @@
   "displayName": "AOCL",
   "description": "vcokltfre/aocl syntax support",
   "version": "1.0.0",
+  "license": "MIT",
+  "repository": "https://github.com/vcokltfre/aocl",
   "engines": {
     "vscode": "^1.84.0"
   },
