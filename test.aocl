@@ -1,6 +1,0 @@
-goto start
-~smile
-@io:println ":)"
-
-~start
-@runtime:breakpoint
