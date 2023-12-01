@@ -48,6 +48,44 @@ pub fn debugger(vm: &mut VM) {
                     println!("expected 1 or 2 arguments, got {}", args.len() - 1);
                 }
             }
+            "goto" => {
+                if args.len() != 2 {
+                    println!("expected 1 argument, got {}", args.len() - 1);
+                    continue;
+                }
+
+                let label = args[1];
+
+                match vm.gotos.get(label) {
+                    Some(index) => {
+                        vm.index = *index;
+                    }
+                    None => {
+                        println!("label not found: {}", label);
+                    }
+                }
+            }
+            "labels" => {
+                if args.len() == 1 {
+                    for (label, index) in &vm.gotos {
+                        println!("{} = {}", label, index);
+                    }
+                } else if args.len() == 2 {
+                    let query = args[1];
+
+                    for (label, index) in &vm.gotos {
+                        if !label.contains(query) {
+                            continue;
+                        }
+                        println!("{} = {}", label, index);
+                    }
+                } else {
+                    println!("expected 1 or 2 arguments, got {}", args.len() - 1);
+                }
+            }
+            "continue" => {
+                break;
+            }
             _ => {
                 println!("unknown command: {}", args[0]);
             }
