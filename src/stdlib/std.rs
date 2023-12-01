@@ -143,9 +143,79 @@ pub fn std_getargs(
     Ok(Some(VMValue::Array(args[1..].to_vec())))
 }
 
+pub fn std_getenv(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() != 1 {
+        return Err(format!("expected 1 argument, got {}", args.len()));
+    }
+
+    let key = match args[0].clone() {
+        VMValue::String(key) => key,
+        _ => return Err(format!("expected string, got {}", args[0].name())),
+    };
+
+    let value = match std::env::var(key) {
+        Ok(value) => value,
+        Err(_) => return Ok(None),
+    };
+
+    Ok(Some(VMValue::String(value)))
+}
+
+pub fn std_setenv(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() != 2 {
+        return Err(format!("expected 2 arguments, got {}", args.len()));
+    }
+
+    let key = match args[0].clone() {
+        VMValue::String(key) => key,
+        _ => return Err(format!("expected string, got {}", args[0].name())),
+    };
+
+    let value = match args[1].clone() {
+        VMValue::String(value) => value,
+        _ => return Err(format!("expected string, got {}", args[1].name())),
+    };
+
+    std::env::set_var(key, value);
+
+    Ok(None)
+}
+
+pub fn std_exit(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() > 1 {
+        return Err(format!("expected 0 or 1 arguments, got {}", args.len()));
+    }
+
+    let code = match args.len() {
+        0 => 0,
+        1 => match args[0].clone() {
+            VMValue::Int(code) => code as i32,
+            _ => return Err(format!("expected int, got {}", args[0].name())),
+        },
+        _ => unreachable!(),
+    };
+
+    std::process::exit(code);
+}
+
 pub fn register(vm: &mut VM) {
     vm.register("std".to_string(), "map".to_string(), std_map);
     vm.register("std".to_string(), "mapdrop".to_string(), std_mapdrop);
     vm.register("std".to_string(), "filter".to_string(), std_filter);
     vm.register("std".to_string(), "getargs".to_string(), std_getargs);
+    vm.register("std".to_string(), "getenv".to_string(), std_getenv);
+    vm.register("std".to_string(), "setenv".to_string(), std_setenv);
+    vm.register("std".to_string(), "exit".to_string(), std_exit);
 }

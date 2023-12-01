@@ -575,6 +575,50 @@
           type: "array",
           description: "The command line arguments.",
         }),
+        makeFunction(
+          "getenv",
+          "Gets an environment variable.",
+          [
+            makeParam(
+              "name",
+              "string",
+              "The name of the environment variable."
+            ),
+          ],
+          {
+            type: "string",
+            description: "The environment variable.",
+          }
+        ),
+        makeFunction(
+          "setenv",
+          "Sets an environment variable.",
+          [
+            makeParam(
+              "name",
+              "string",
+              "The name of the environment variable."
+            ),
+            makeParam(
+              "value",
+              "string",
+              "The value of the environment variable."
+            ),
+          ],
+          {
+            type: "void",
+            description: "Nothing.",
+          }
+        ),
+        makeFunction(
+          "exit",
+          "Exits the program.",
+          [makeParam("code", "int?", "The exit code.")],
+          {
+            type: "void",
+            description: "Nothing.",
+          }
+        ),
       ],
     };
 
