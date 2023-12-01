@@ -5,7 +5,7 @@ use crate::{
     frontend::parser::{BinOp, CallTarget, Compare, Statement, StatementContext, Value},
 };
 
-use super::VMValue;
+use super::{debugger, VMValue};
 
 pub type VMFunc = fn(&mut VM, Vec<Option<String>>, Vec<VMValue>) -> Result<Option<VMValue>, String>;
 
@@ -17,6 +17,7 @@ pub struct VM {
     pub index: usize,
     pub call_stack: Vec<usize>,
     pub stack: Vec<VMValue>,
+    pub breakpoint: bool,
 }
 
 impl VM {
@@ -29,6 +30,7 @@ impl VM {
             index: 0,
             call_stack: Vec::new(),
             stack: Vec::new(),
+            breakpoint: false,
         }
     }
 
@@ -113,6 +115,12 @@ impl VM {
         }
 
         self.index += 1;
+
+        if self.breakpoint {
+            self.breakpoint = false;
+
+            debugger::debugger(self);
+        }
 
         Ok(())
     }

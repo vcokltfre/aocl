@@ -1,3 +1,4 @@
+mod debugger;
 mod value;
 mod vm;
 

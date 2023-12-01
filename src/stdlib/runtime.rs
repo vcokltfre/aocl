@@ -23,6 +23,21 @@ pub fn runtime_goto(
     }
 }
 
+pub fn runtime_breakpoint(
+    vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    _args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    vm.breakpoint = true;
+
+    Ok(None)
+}
+
 pub fn register(vm: &mut VM) {
     vm.register("runtime".to_string(), "gotolabel".to_string(), runtime_goto);
+    vm.register(
+        "runtime".to_string(),
+        "breakpoint".to_string(),
+        runtime_breakpoint,
+    );
 }
