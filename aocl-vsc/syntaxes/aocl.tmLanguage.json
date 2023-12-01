@@ -49,7 +49,7 @@
       "match": "\\b(\\d+(\\.\\d+)?)\\b"
     },
     "calls": {
-      "name": "meta.function-call.aocl",
+      "name": "entity.name.function.aocl",
       "match": "@([a-zA-Z_][a-zA-Z0-9_]*):([a-zA-Z_][a-zA-Z0-9_]*)\\b"
     },
     "identifiers": {
