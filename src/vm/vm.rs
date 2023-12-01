@@ -126,7 +126,18 @@ impl VM {
     }
 
     fn op_assign_literal(&mut self, identifier: String, value: Value) -> Result<(), String> {
-        self.variables.insert(identifier, VMValue::from(value));
+        match value {
+            Value::Identifier(id) => {
+                if let Some(value) = self.variables.get(&id) {
+                    self.variables.insert(identifier, value.clone());
+                } else {
+                    return Err(format!("variable not found: {}", identifier));
+                }
+            }
+            _ => {
+                self.variables.insert(identifier, VMValue::from(value));
+            },
+        }
 
         Ok(())
     }
