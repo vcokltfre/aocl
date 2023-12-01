@@ -449,6 +449,7 @@ impl Lexer {
                         break;
                     }
                     if c.unwrap() == '\n' {
+                        self.line += 1;
                         break;
                     }
                 }
