@@ -2,6 +2,7 @@ pub mod array;
 pub mod convert;
 pub mod file;
 pub mod io;
+pub mod iter;
 pub mod math;
 pub mod runtime;
 pub mod stack;
