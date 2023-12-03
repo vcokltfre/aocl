@@ -133,6 +133,62 @@ pub fn std_filter(
     Ok(Some(VMValue::Array(new_array)))
 }
 
+pub fn std_any(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() != 1 {
+        return Err(format!("expected 1 , got {}", args.len()));
+    }
+
+    let values = match &args[0] {
+        VMValue::Array(values) => values,
+        _ => return Err(format!("expected array, got {}", args[2].name())),
+    };
+
+    for value in values {
+        match value {
+            VMValue::Bool(boolean) => {
+                if *boolean {
+                    return Ok(Some(VMValue::Bool(true)));
+                }
+            }
+            _ => return Err(format!("expected boolean, got {}", value.name())),
+        }
+    }
+
+    Ok(Some(VMValue::Bool(false)))
+}
+
+pub fn std_all(
+    _vm: &mut VM,
+    _idts: Vec<Option<String>>,
+    args: Vec<VMValue>,
+) -> Result<Option<VMValue>, String> {
+    if args.len() != 1 {
+        return Err(format!("expected 1 , got {}", args.len()));
+    }
+
+    let values = match &args[0] {
+        VMValue::Array(values) => values,
+        _ => return Err(format!("expected array, got {}", args[2].name())),
+    };
+
+    for value in values {
+        match value {
+            VMValue::Bool(boolean) => {
+                if !*boolean {
+                    return Ok(Some(VMValue::Bool(false)));
+                }
+            }
+            _ => return Err(format!("expected boolean, got {}", value.name())),
+        }
+    }
+
+    Ok(Some(VMValue::Bool(true)))
+}
+
 pub fn std_getargs(
     _vm: &mut VM,
     _idts: Vec<Option<String>>,
@@ -214,6 +270,8 @@ pub fn register(vm: &mut VM) {
     vm.register("std".to_string(), "map".to_string(), std_map);
     vm.register("std".to_string(), "mapdrop".to_string(), std_mapdrop);
     vm.register("std".to_string(), "filter".to_string(), std_filter);
+    vm.register("std".to_string(), "any".to_string(), std_any);
+    vm.register("std".to_string(), "all".to_string(), std_all);
     vm.register("std".to_string(), "getargs".to_string(), std_getargs);
     vm.register("std".to_string(), "getenv".to_string(), std_getenv);
     vm.register("std".to_string(), "setenv".to_string(), std_setenv);
