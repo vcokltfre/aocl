@@ -16,7 +16,7 @@ pub fn math_sum(
 
     let mut sum = 0;
 
-    for part in array {
+    for part in array.borrow().clone().into_iter() {
         let int = match part {
             VMValue::Int(int) => int,
             _ => return Err(format!("expected int in array, got {}", part.name())),
@@ -44,14 +44,14 @@ pub fn math_max(
 
     let mut max = std::i64::MIN;
 
-    for part in array {
+    for part in array.borrow().clone().into_iter() {
         let int = match part {
             VMValue::Int(int) => int,
             _ => return Err(format!("expected int in array, got {}", part.name())),
         };
 
-        if int > &max {
-            max = *int;
+        if int > max {
+            max = int;
         }
     }
 

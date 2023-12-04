@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crate::vm::{VMValue, VM};
 
 pub fn string_split(
@@ -25,7 +27,7 @@ pub fn string_split(
         array.push(VMValue::String(part.to_string()));
     }
 
-    Ok(Some(VMValue::Array(array)))
+    Ok(Some(VMValue::Array(Rc::new(RefCell::new(array)))))
 }
 
 pub fn string_join(
@@ -49,7 +51,7 @@ pub fn string_join(
 
     let mut string = String::new();
 
-    for (i, part) in array.iter().enumerate() {
+    for (i, part) in array.borrow().iter().enumerate() {
         if i != 0 {
             string += separator;
         }
@@ -141,7 +143,7 @@ pub fn string_toarray(
         array.push(VMValue::String(c.to_string()));
     }
 
-    Ok(Some(VMValue::Array(array)))
+    Ok(Some(VMValue::Array(Rc::new(RefCell::new(array)))))
 }
 
 pub fn register(vm: &mut VM) {

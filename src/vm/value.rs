@@ -1,4 +1,5 @@
 use core::fmt;
+use std::{cell::RefCell, rc::Rc};
 
 use crate::frontend::parser::Value;
 
@@ -8,8 +9,8 @@ pub enum VMValue {
     Int(i64),
     Float(f64),
     String(String),
-    Identifier(String),
-    Array(Vec<VMValue>),
+    Identifier(Rc<RefCell<String>>),
+    Array(Rc<RefCell<Vec<VMValue>>>),
 }
 
 impl fmt::Display for VMValue {
@@ -19,11 +20,11 @@ impl fmt::Display for VMValue {
             Self::Int(int) => write!(f, "{}", int),
             Self::Float(float) => write!(f, "{}", float),
             Self::String(string) => write!(f, "{}", string),
-            Self::Identifier(identifier) => write!(f, "{}", identifier),
+            Self::Identifier(identifier) => write!(f, "{}", identifier.borrow()),
             Self::Array(array) => {
                 write!(f, "[")?;
 
-                for (i, value) in array.iter().enumerate() {
+                for (i, value) in array.borrow().iter().enumerate() {
                     if i != 0 {
                         write!(f, ", ")?;
                     }
@@ -60,7 +61,7 @@ impl VMValue {
             Value::Int(int) => Self::Int(int),
             Value::Float(float) => Self::Float(float),
             Value::String(string) => Self::String(string),
-            Value::Identifier(identifier) => Self::Identifier(identifier),
+            Value::Identifier(identifier) => Self::Identifier(Rc::new(RefCell::new(identifier))),
         }
     }
 

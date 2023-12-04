@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crate::vm::{VMValue, VM};
 
 pub fn std_map(
@@ -26,7 +28,7 @@ pub fn std_map(
 
     let mut new_array = Vec::new();
 
-    for value in values {
+    for value in values.borrow().clone().into_iter() {
         let mut idts = idts.clone();
         idts.push(Some("value".to_string()));
 
@@ -39,7 +41,7 @@ pub fn std_map(
         }
     }
 
-    Ok(Some(VMValue::Array(new_array)))
+    Ok(Some(VMValue::Array(Rc::new(RefCell::new(new_array)))))
 }
 
 // same as map but doesn't care about None values and returns None
@@ -67,7 +69,7 @@ pub fn std_mapdrop(
         _ => return Err(format!("expected array, got {}", args[2].name())),
     };
 
-    for value in values {
+    for value in values.borrow().clone().into_iter() {
         let mut idts = idts.clone();
         idts.push(Some("value".to_string()));
 
@@ -108,7 +110,7 @@ pub fn std_filter(
 
     let mut new_array = Vec::new();
 
-    for value in values {
+    for value in values.borrow().clone().into_iter() {
         let mut idts = idts.clone();
         idts.push(Some("value".to_string()));
 
@@ -130,7 +132,7 @@ pub fn std_filter(
         }
     }
 
-    Ok(Some(VMValue::Array(new_array)))
+    Ok(Some(VMValue::Array(Rc::new(RefCell::new(new_array)))))
 }
 
 pub fn std_any(
@@ -147,10 +149,10 @@ pub fn std_any(
         _ => return Err(format!("expected array, got {}", args[2].name())),
     };
 
-    for value in values {
+    for value in values.borrow().clone().into_iter() {
         match value {
             VMValue::Bool(boolean) => {
-                if *boolean {
+                if boolean {
                     return Ok(Some(VMValue::Bool(true)));
                 }
             }
@@ -175,10 +177,10 @@ pub fn std_all(
         _ => return Err(format!("expected array, got {}", args[2].name())),
     };
 
-    for value in values {
+    for value in values.borrow().clone().into_iter() {
         match value {
             VMValue::Bool(boolean) => {
-                if !*boolean {
+                if !boolean {
                     return Ok(Some(VMValue::Bool(false)));
                 }
             }
@@ -196,7 +198,9 @@ pub fn std_getargs(
 ) -> Result<Option<VMValue>, String> {
     let args: Vec<VMValue> = std::env::args().map(VMValue::String).collect();
 
-    Ok(Some(VMValue::Array(args[1..].to_vec())))
+    Ok(Some(VMValue::Array(Rc::new(RefCell::new(
+        args[1..].to_vec(),
+    )))))
 }
 
 pub fn std_getenv(

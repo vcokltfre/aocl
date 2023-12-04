@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crate::vm::{VMValue, VM};
 
 pub fn array_new(
@@ -5,7 +7,7 @@ pub fn array_new(
     _idts: Vec<Option<String>>,
     args: Vec<VMValue>,
 ) -> Result<Option<VMValue>, String> {
-    Ok(Some(VMValue::Array(args)))
+    Ok(Some(VMValue::Array(Rc::new(RefCell::new(args)))))
 }
 
 pub fn array_get(
@@ -27,11 +29,13 @@ pub fn array_get(
         _ => return Err(format!("expected int, got {}", args[1].name())),
     };
 
-    if *index < 0 || *index as usize >= array.len() {
+    if *index < 0 || *index as usize >= array.borrow().len() {
         return Err(format!("index out of bounds: {}", index));
     }
 
-    Ok(Some(array[*index as usize].clone()))
+    let value = array.borrow()[*index as usize].clone();
+
+    Ok(Some(value))
 }
 
 pub fn array_pop(
@@ -48,16 +52,20 @@ pub fn array_pop(
         _ => return Err(format!("expected array, got {}", args[0].name())),
     };
 
-    if array.len() == 0 {
+    if array.borrow().len() == 0 {
         return Err(format!("cannot pop from empty array"));
     }
 
-    let new_array = array[..array.len() - 1].to_vec();
+    let new_array = array.borrow()[..array.borrow().len() - 1].to_vec();
 
-    vm.variables
-        .insert(idts[0].clone().unwrap(), VMValue::Array(new_array));
+    vm.variables.insert(
+        idts[0].clone().unwrap(),
+        VMValue::Array(Rc::new(RefCell::new(new_array))),
+    );
 
-    Ok(Some(array[array.len() - 1].clone()))
+    let popped = array.borrow()[array.borrow().len() - 1].clone();
+
+    Ok(Some(popped))
 }
 
 pub fn array_popat(
@@ -79,17 +87,17 @@ pub fn array_popat(
         _ => return Err(format!("expected int, got {}", args[1].name())),
     };
 
-    if *index < 0 || *index as usize >= array.len() {
+    if *index < 0 || *index as usize >= array.borrow().len() {
         return Err(format!("index out of bounds: {}", index));
     }
 
-    let mut new_array = array.clone();
-    new_array.remove(*index as usize);
+    let new_array = array.clone();
+    new_array.borrow_mut().remove(*index as usize);
 
     vm.variables
         .insert(idts[0].clone().unwrap(), VMValue::Array(new_array));
 
-    Ok(Some(array[*index as usize].clone()))
+    Ok(Some(array.borrow()[*index as usize].clone()))
 }
 
 pub fn array_push(
@@ -108,11 +116,10 @@ pub fn array_push(
 
     let value = args[1].clone();
 
-    let mut new_array = array.clone();
-    new_array.push(value);
+    array.borrow_mut().push(value.clone());
 
     vm.variables
-        .insert(idts[0].clone().unwrap(), VMValue::Array(new_array));
+        .insert(idts[0].clone().unwrap(), VMValue::Array(array.clone()));
 
     Ok(None)
 }
@@ -135,7 +142,7 @@ pub fn array_index(
 
     let mut index = -1;
 
-    for (i, v) in array.iter().enumerate() {
+    for (i, v) in array.borrow().iter().enumerate() {
         if v == &value {
             index = i as i64;
             break;
@@ -159,8 +166,8 @@ pub fn array_reverse(
         _ => return Err(format!("expected array, got {}", args[0].name())),
     };
 
-    let mut new_array = array.clone();
-    new_array.reverse();
+    let new_array = array.clone();
+    new_array.borrow_mut().reverse();
 
     vm.variables
         .insert(idts[0].clone().unwrap(), VMValue::Array(new_array));
@@ -182,8 +189,8 @@ pub fn array_sort(
         _ => return Err(format!("expected array, got {}", args[0].name())),
     };
 
-    let mut new_array = array.clone();
-    new_array.sort();
+    let new_array = array.clone();
+    new_array.borrow_mut().sort();
 
     vm.variables
         .insert(idts[0].clone().unwrap(), VMValue::Array(new_array));
@@ -205,7 +212,7 @@ pub fn array_len(
         _ => return Err(format!("expected array, got {}", args[0].name())),
     };
 
-    Ok(Some(VMValue::Int(array.len() as i64)))
+    Ok(Some(VMValue::Int(array.borrow().len() as i64)))
 }
 
 pub fn array_clone(
