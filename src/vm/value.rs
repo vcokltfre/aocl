@@ -71,6 +71,12 @@ impl VMValue {
             (Self::Float(left), Self::Float(right)) => Ok(Self::Float(left + right)),
             (Self::Int(left), Self::Float(right)) => Ok(Self::Float(*left as f64 + right)),
             (Self::Float(left), Self::Int(right)) => Ok(Self::Float(left + *right as f64)),
+            (Self::Array(left), Self::Array(right)) => {
+                let mut new_array = left.borrow().clone();
+                new_array.extend(right.borrow().clone());
+
+                Ok(Self::Array(Rc::new(RefCell::new(new_array))))
+            }
             _ => Err(format!("cannot add {} and {}", self.name(), other.name())),
         }
     }
