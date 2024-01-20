@@ -229,7 +229,9 @@ pub fn array_clone(
         _ => return Err(format!("expected array, got {}", args[0].name())),
     };
 
-    Ok(Some(VMValue::Array(array.clone())))
+    Ok(Some(VMValue::Array(Rc::new(RefCell::new(
+        array.borrow().clone(),
+    )))))
 }
 
 pub fn array_is(
