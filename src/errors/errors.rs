@@ -1,6 +1,56 @@
 use std::fmt;
 
-use colored::Colorize;
+trait Colorable {
+    fn red(&self) -> String;
+    fn green(&self) -> String;
+    fn blue(&self) -> String;
+    fn cyan(&self) -> String;
+    fn bold(&self) -> String;
+}
+
+impl Colorable for String {
+    fn red(&self) -> String {
+        format!("{}{}{}", "\x1b[31m", self, "\x1b[0m")
+    }
+
+    fn green(&self) -> String {
+        format!("{}{}{}", "\x1b[32m", self, "\x1b[0m")
+    }
+
+    fn blue(&self) -> String {
+        format!("{}{}{}", "\x1b[34m", self, "\x1b[0m")
+    }
+
+    fn cyan(&self) -> String {
+        format!("{}{}{}", "\x1b[36m", self, "\x1b[0m")
+    }
+
+    fn bold(&self) -> String {
+        format!("{}{}{}", "\x1b[1m", self, "\x1b[0m")
+    }
+}
+
+impl Colorable for &str {
+    fn red(&self) -> String {
+        format!("{}{}{}", "\x1b[31m", self, "\x1b[0m")
+    }
+
+    fn green(&self) -> String {
+        format!("{}{}{}", "\x1b[32m", self, "\x1b[0m")
+    }
+
+    fn blue(&self) -> String {
+        format!("{}{}{}", "\x1b[34m", self, "\x1b[0m")
+    }
+
+    fn cyan(&self) -> String {
+        format!("{}{}{}", "\x1b[36m", self, "\x1b[0m")
+    }
+
+    fn bold(&self) -> String {
+        format!("{}{}{}", "\x1b[1m", self, "\x1b[0m")
+    }
+}
 
 #[allow(dead_code)]
 #[derive(Debug)]
