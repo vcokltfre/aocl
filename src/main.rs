@@ -2,10 +2,13 @@ use std::fs;
 
 use stdlib::{array, convert, file, io, iter, math, runtime, stack, std as aoclstd, string, test};
 
+use crate::vvm::vvm_run;
+
 mod errors;
 mod frontend;
 mod stdlib;
 mod vm;
+mod vvm;
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
@@ -31,6 +34,11 @@ fn main() {
 
     if let Err(e) = program {
         println!("{}", e);
+        return;
+    }
+
+    if std::env::var("AOCL_VVM").is_ok() {
+        vvm_run(&program.as_ref().unwrap());
         return;
     }
 
